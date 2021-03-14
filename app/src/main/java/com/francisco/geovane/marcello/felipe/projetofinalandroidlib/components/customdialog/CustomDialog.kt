@@ -10,6 +10,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
@@ -20,14 +21,22 @@ class CustomDialog : View.OnClickListener {
     private lateinit var ivAlertDialogImage: ImageView
     private lateinit var tvAlertDialogTitle: TextView
     private lateinit var tvAlertDialogMessage: TextView
-    private lateinit var btAlertDialogConfirm: TextView
+    private lateinit var btAlertDialogConfirm: Button
+    private lateinit var btAlertDialogCancel: Button
     private var dialog: Dialog? = null
     private var activity: Activity? = null
 
-    fun showDialog(activity: Activity, resId: Int?, title: String?, msg: String?, buttonPrimaryText: String?, primaryClickListener: View.OnClickListener?, isCancelable: Boolean) {
+    fun showDialog(activity: Activity,
+                   resId: Int?,
+                   title: String?,
+                   msg: String?, buttonPrimaryText: String?, primaryClickListener: View.OnClickListener?,
+                   buttonSecondaryText: String?, secondaryClickListener: View.OnClickListener?,
+                   isCancelable: Boolean) {
         createDialog(
-            activity, resId, title, msg, buttonPrimaryText,
-            primaryClickListener, isCancelable
+            activity, resId, title, msg,
+            buttonPrimaryText, primaryClickListener,
+            buttonSecondaryText, secondaryClickListener,
+            isCancelable
         )
     }
 
@@ -49,7 +58,7 @@ class CustomDialog : View.OnClickListener {
         dialog?.window?.attributes = lp
     }
 
-    private fun createDialog(activity: Activity, resId: Int?, title: String?, msg: String?, buttonPrimaryText: String?, primaryClickListener: View.OnClickListener?, isCancelable: Boolean) {
+    private fun createDialog(activity: Activity, resId: Int?, title: String?, msg: String?, buttonPrimaryText: String?, primaryClickListener: View.OnClickListener?, buttonSecondaryText: String?, secondaryClickListener: View.OnClickListener?, isCancelable: Boolean) {
         if (dialog != null) {
             dismissDialog()
         }
@@ -58,7 +67,8 @@ class CustomDialog : View.OnClickListener {
         ivAlertDialogImage = dialog?.findViewById(R.id.ivAlertDialogImage) as ImageView
         tvAlertDialogTitle = dialog?.findViewById(R.id.tvAlertDialogTitle) as TextView
         tvAlertDialogMessage = dialog?.findViewById(R.id.tvAlertDialogMessage) as TextView
-        btAlertDialogConfirm = dialog?.findViewById(R.id.btAlertDialogConfirm) as TextView
+        btAlertDialogConfirm = dialog?.findViewById(R.id.btAlertDialogConfirm) as Button
+        btAlertDialogCancel = dialog?.findViewById(R.id.btAlertDialogCancel) as Button
 
         resId?.let {
             val bm = ResourcesCompat.getDrawable(activity.resources, it, null)
@@ -70,13 +80,18 @@ class CustomDialog : View.OnClickListener {
         tvAlertDialogMessage.fromHtml(msg?.replace("\n", "<br />"))
         tvAlertDialogMessage.movementMethod = LinkMovementMethod.getInstance()
         btAlertDialogConfirm.text = buttonPrimaryText ?: "OK"
+        btAlertDialogCancel.text = buttonSecondaryText ?: "Cancel"
 
         if (primaryClickListener == null) {
-            btAlertDialogConfirm.visibility = View.GONE
             btAlertDialogConfirm.setOnClickListener { dialog?.dismiss() }
         } else {
-            btAlertDialogConfirm.visibility = View.VISIBLE
             btAlertDialogConfirm.setOnClickListener(primaryClickListener)
+        }
+
+        if (secondaryClickListener == null) {
+            btAlertDialogCancel.setOnClickListener { dialog?.dismiss() }
+        } else {
+            btAlertDialogCancel.setOnClickListener(secondaryClickListener)
         }
 
         if (isCancelable) {
